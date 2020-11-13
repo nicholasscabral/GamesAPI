@@ -18,6 +18,13 @@ db.connect( (err) => {
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
+app.get('/games', (req, res) => {
+  db.query('SELECT * FROM games', (err, result) => {
+    if ( err ) res.status(404).send("nenhum jogo encontrado")
+    else return res.status(200).send(result)
+  })
+})
+
 app.listen(4321, () => {
   console.log("API running...")
 })
