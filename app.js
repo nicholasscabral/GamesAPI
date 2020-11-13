@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const mysql = require('mysql')
+const dotenv = require('dotenv')
+
+dotenv.config({ path: './.env' })
 
 const db = mysql.createConnection({
   host: process.env.DATABASE_HOST,
