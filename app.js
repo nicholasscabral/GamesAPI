@@ -28,6 +28,42 @@ app.get('/games', (req, res) => {
   })
 })
 
+app.get('/game/:id', (req, res) => {
+  
+  const id = req.params.id //validando dados
+
+  if (isNaN(id)) res.sendStatus(400)
+  else {
+    
+    db.query('SELECT * FROM games WHERE id = ?', id, (err, results) => {
+
+      if (err) {
+        console.log(err)
+        res.sendStatus(500)
+      }
+      else if (results.length == 0) return res.status(404).send("JOGO NAO ENCONTRADO")
+        else return res.status(200).send(results)
+      
+    })
+  }
+})
+
+app.post('/game', (req, res) => {
+
+  const { title, price, year } = req.body
+
+  db.query('INSERT INTO games SET ?', {title: title, price: price, year: year}, (err, result) => {
+    if (err) {
+      console.log(err)
+      res.sendStatus(400)
+    }
+    else {
+      console.log(result)
+      return res.status(200).send("JOGO CADASTRADO")
+    }
+  })
+})
+
 app.listen(4321, () => {
   console.log("API running...")
 })
