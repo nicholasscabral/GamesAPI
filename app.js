@@ -64,6 +64,25 @@ app.post('/game', (req, res) => {
   })
 })
 
+app.delete('/game/:id', (req, res) => {
+
+  const id = req.params.id
+
+  if (isNaN(id)) res.sendStatus(400)
+  else {
+    db.query("SELECT * FROM games WHERE id = ?", id, (err, result) => {
+      if (err) res.sendStatus(500)
+      else if (result.length === 0) return res.status(404).send("GAME NOT FOUND")
+        else {
+          db.query("DELETE FROM games WHERE id = ?", id, (err, result) => {
+            if (err) res.sendStatus(500)
+            else res.status(200).send("GAME DELETED ")
+          })
+        }
+    })
+  }
+})
+
 app.listen(4321, () => {
   console.log("API running...")
 })
