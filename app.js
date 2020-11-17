@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const mysql = require('mysql')
 const dotenv = require('dotenv')
+const cors = require('cors')
 
 dotenv.config({ path: './.env' })
 
@@ -20,6 +21,7 @@ db.connect( (err) => {
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
+app.use(cors())
 
 app.get('/games', (req, res) => {
   db.query('SELECT * FROM games', (err, result) => {
