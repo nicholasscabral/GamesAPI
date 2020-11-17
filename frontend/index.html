@@ -53,11 +53,13 @@
     var id = ListItem.getAttribute("data-id")
     console.log(id)
 
-    axios.post(`http://localhost:4321/delete-game/${id}`).then(response => {
-      window.location.reload()
-    }).catch(error => {
-      console.log(error)
-    })
+    if (confirm("Are you sure you want to delete this game?")) {
+      axios.post(`http://localhost:4321/delete-game/${id}`).then(response => {
+        window.location.reload()
+      }).catch(error => {
+        console.log(error)
+      })
+    } else return
   }
 
   function loadForm(ListItem) {
