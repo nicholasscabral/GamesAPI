@@ -73,8 +73,12 @@ app.post('/delete-game/:id', (req, res) => {
   if (isNaN(id)) return res.status(400)
   else {
     db.query('DELETE FROM games WHERE id = ?', id, (err, result) => {
-      if (err) return res.status(404).send("GAME NOT FOUND")
-      else return res.status(200).send("GAME DELETED")
+      if (err) return res.status(404).send({
+        success: false
+      })
+      else return res.status(200).send({
+        success: true
+      })
     })
   }
 })
