@@ -26,6 +26,29 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use(cors())
 
+function auth(req, res, next) {
+  const authToken = req.headers['authorization']
+
+  if (authToken !== undefined) {
+
+    const bearer = authToken.split(' ')
+    var token = bearer[1]
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
+      if (err) return res.status(401).send({ message: "Invalid Token"})
+      else {
+
+        req.token = token
+        req.loggedUser = {id: data.id, email: data.email}
+        next()
+
+      }
+    })
+  } else {
+    return res.staus(401).send({ message: "Invalid Token"})
+  }
+}
+
 const getQueryRes = async (query) => new Promise((resolve, reject) => {
   db.query(query, (err, res) => {
     if (err) reject(err)
@@ -33,10 +56,10 @@ const getQueryRes = async (query) => new Promise((resolve, reject) => {
   })
 })
 
-app.get('/games', (req, res) => {
+app.get('/games', auth, (req, res) => {
   db.query('SELECT * FROM games', (err, result) => {
     if ( err ) res.status(404).send("nenhum jogo encontrado")
-    else return res.status(200).send(result)
+    else return res.status(200).send({ user:req.loggedUser, games:result})
   })
 })
 
