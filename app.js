@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const mysql = require('mysql')
 const dotenv = require('dotenv')
 const cors = require('cors')
+const bcrypt = require('bcryptjs')
 
 dotenv.config({ path: './.env' })
 
@@ -124,6 +125,25 @@ app.post('/update-game/:id', (req, res) => {
       }
     })
   }
+})
+
+app.post('/register', async (req, res) => {
+  const {username, email, password, passwordConf} = req.body
+
+  if (!username || !email || !password) {
+    return res.status(400).send({ message: 'Invalid credencials'})
+  }
+
+  if (password != passwordConf) {
+    return res.status(400).send({ message: 'passwords do not match'})
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 8)
+
+  db.query('INSERT INTO users SET ?', { username: username, email: email, password: hashedPassword }, (err, result) => {
+    if (err) return res.status(500).send(err)
+    else return res.status(200).send({ message: 'Success'})
+  })
 })
 
 app.listen(4321, () => {
