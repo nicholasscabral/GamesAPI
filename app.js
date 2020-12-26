@@ -160,21 +160,27 @@ app.post('/auth', async (req, res) => {
   
   if (email != undefined) {
     var result = await getQueryRes(`SELECT * FROM users WHERE email = "${email}"`)
-    var user = result[0]
+    
+    if (result.length > 0) {
+      console.log(result)
+      var user = result[0]
 
-    var passwordsMatches = await bcrypt.compare(password, user.password)
+      var passwordsMatches = await bcrypt.compare(password, user.password)
 
-    if (passwordsMatches) {
-      jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN
-      }, (err, token) => {
-        if (err) res.status(500)
-        else return res.status(200).send(token)
-      })
+      if (passwordsMatches) {
+        jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET, {
+          expiresIn: process.env.JWT_EXPIRES_IN
+        }, (err, token) => {
+          if (err) res.status(500)
+          else return res.status(200).send(token)
+        })
+      }
+    } else {
+      return res.status(404).send("no user found")
     }
   }
 })
 
 app.listen(4321, () => {
   console.log("API running...")
-})
+}) 
