@@ -5,6 +5,8 @@ const mysql = require('mysql')
 const dotenv = require('dotenv')
 const cors = require('cors')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const Promise = require('bluebird')
 
 dotenv.config({ path: './.env' })
 
@@ -23,6 +25,13 @@ db.connect( (err) => {
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use(cors())
+
+const getQueryRes = async (query) => new Promise((resolve, reject) => {
+  db.query(query, (err, res) => {
+    if (err) reject(err)
+    else resolve(res)
+  })
+})
 
 app.get('/games', (req, res) => {
   db.query('SELECT * FROM games', (err, result) => {
@@ -144,6 +153,26 @@ app.post('/register', async (req, res) => {
     if (err) return res.status(500).send(err)
     else return res.status(200).send({ message: 'Success'})
   })
+})
+
+app.post('/auth', async (req, res) => {
+  const { email, password } = req.body
+  
+  if (email != undefined) {
+    var result = await getQueryRes(`SELECT * FROM users WHERE email = "${email}"`)
+    var user = result[0]
+
+    var passwordsMatches = await bcrypt.compare(password, user.password)
+
+    if (passwordsMatches) {
+      jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN
+      }, (err, token) => {
+        if (err) res.status(500)
+        else return res.status(200).send(token)
+      })
+    }
+  }
 })
 
 app.listen(4321, () => {
